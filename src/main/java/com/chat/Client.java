@@ -56,7 +56,7 @@ public class Client extends Application {
         Optional<String> result;
         do {
             result = dialog.showAndWait();
-        } while (!result.isPresent());
+        } while (!result.isPresent() && result.get().strip().length() > 0);
         String username = result.get().strip();
         FXMLLoader loader = new FXMLLoader(getClass().getResource("view.fxml"));
         Scene scene = new Scene(loader.load());
@@ -65,5 +65,9 @@ public class Client extends Application {
         serverHandler.send(new Request(Request.Type.SET_USERNAME, username));
         stage.setScene(scene);
         stage.show();
+    }
+
+    public void start() {
+        launch();
     }
 }

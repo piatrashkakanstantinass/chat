@@ -51,17 +51,44 @@ public class ClientHandler extends ConnectionHandler {
             case CREATE_ROOM:
                 Room room = Room.createRoom();
                 room.getUsers().add(username);
+                room.setOnlyTwoUsers(request.isOnlyTwoUsers());
+                if (request.isOnlyTwoUsers() && !username.equals(request.getText())) {
+                    room.getUsers().add(request.getText());
+                }
                 List<Room> rooms = server.getRooms();
                 synchronized (rooms) {
                     rooms.add(room);
                 }
                 server.broadcastUser(username);
                 break;
+            case DESTROY_ROOM:
+                rooms = server.getRooms();
+                Room specifiedRoom = null;
+                synchronized (rooms) {
+                    for (Room r : rooms) {
+                        if (r.getId() == request.getRoomId() && r.getUsers().contains(username)) {
+                            specifiedRoom = r;
+                            rooms.remove(r);
+                            break;
+                        }
+                    }
+                }
+                if (specifiedRoom == null)
+                    return;
+                synchronized (server.getClientHandlers()) {
+                    for (ClientHandler ch : server.getClientHandlers()) {
+                        if (ch.getUsername() != null && specifiedRoom.getUsers().contains(ch.getUsername()))
+                            ch.broadcast();
+                    }
+                }
+                break;
             case ADD_USER:
                 rooms = server.getRooms();
                 synchronized (rooms) {
                     for (Room r : rooms) {
                         if (r.getId() == request.getRoomId() && r.getUsers().contains(username) && !r.getUsers().contains(request.getText())) {
+                            if (r.isOnlyTwoUsers() && r.getUsers().size() >= 2)
+                                break;
                             r.getUsers().add(request.getText());
                         }
                     }

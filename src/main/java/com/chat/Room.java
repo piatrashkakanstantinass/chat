@@ -11,6 +11,16 @@ public class Room implements Serializable {
 
     private static int nextId = 0;
 
+    private boolean onlyTwoUsers = false;
+
+    public boolean isOnlyTwoUsers() {
+        return onlyTwoUsers;
+    }
+
+    public void setOnlyTwoUsers(boolean onlyTwoUsers) {
+        this.onlyTwoUsers = onlyTwoUsers;
+    }
+
     public static Room createRoom() {
         return new Room();
     }
